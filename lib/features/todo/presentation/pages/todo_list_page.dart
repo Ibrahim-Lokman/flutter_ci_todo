@@ -12,7 +12,7 @@ class TodoListPage extends StatelessWidget {
     final todoService = TodoService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Todo List')),
+      appBar: AppBar(title: const Text('Todo List PRO')),
       body: StreamBuilder<List<Todo>>(
         stream: todoService.getTodos(),
         builder: (context, snapshot) {
