@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/todo_model.dart';
-import '../../data/todo_service.dart';
+import '../providers/todo_provider.dart';
 import '../widgets/todo_item_tile.dart';
 import 'todo_edit_page.dart';
 
@@ -9,21 +10,19 @@ class TodoListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todoService = TodoService();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Todo List PRO')),
-      body: StreamBuilder<List<Todo>>(
-        stream: todoService.getTodos(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: Consumer<TodoProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final todos = snapshot.data ?? [];
+          if (provider.error != null) {
+            return Center(child: Text('Error: ${provider.error}'));
+          }
+
+          final todos = provider.todos;
 
           if (todos.isEmpty) {
             return const Center(child: Text('No todos yet. Add one!'));
@@ -44,20 +43,14 @@ class TodoListPage extends StatelessWidget {
                   );
                 },
                 onDismissed: (direction) {
-                  todoService.deleteTodo(todo.id);
+                  provider.deleteTodo(todo.id);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('${todo.title} deleted')),
                   );
                 },
                 onCheckboxChanged: (value) {
                   if (value != null) {
-                    final updatedTodo = Todo(
-                      id: todo.id,
-                      title: todo.title,
-                      description: todo.description,
-                      isCompleted: value,
-                    );
-                    todoService.updateTodo(updatedTodo);
+                    provider.toggleTodoStatus(todo);
                   }
                 },
               );

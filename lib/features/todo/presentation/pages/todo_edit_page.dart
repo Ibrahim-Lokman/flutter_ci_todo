@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/todo_model.dart';
-import '../../data/todo_service.dart';
+import '../providers/todo_provider.dart';
 
 class TodoEditPage extends StatefulWidget {
   final Todo? todo;
@@ -15,7 +16,6 @@ class _TodoEditPageState extends State<TodoEditPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _todoService = TodoService();
 
   @override
   void initState() {
@@ -37,9 +37,10 @@ class _TodoEditPageState extends State<TodoEditPage> {
     if (_formKey.currentState!.validate()) {
       final title = _titleController.text;
       final description = _descriptionController.text;
+      final provider = Provider.of<TodoProvider>(context, listen: false);
 
       if (widget.todo == null) {
-        await _todoService.addTodo(title, description);
+        await provider.addTodo(title, description);
       } else {
         final updatedTodo = Todo(
           id: widget.todo!.id,
@@ -47,7 +48,7 @@ class _TodoEditPageState extends State<TodoEditPage> {
           description: description,
           isCompleted: widget.todo!.isCompleted,
         );
-        await _todoService.updateTodo(updatedTodo);
+        await provider.updateTodo(updatedTodo);
       }
 
       if (mounted) {
